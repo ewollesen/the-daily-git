@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+require "micro-optparse"
+require "time"
+require_relative "../lib/models/daily"
+
+SECONDS_IN_A_DAY = 86400
+
+def yesterday
+  now = Time.now
+  yesterday = Time.local(now.year, now.month, now.day) - SECONDS_IN_A_DAY
+  yesterday.strftime("%Y-%m-%d")
+end
+
+def parse_options
+  Parser.new do |p|
+    p.banner = "The Daily Git"
+    p.version = "the-daily-git 0.1 alpha"
+    p.option :date, "the date for which to show commits", :default => yesterday#, :value_satisfies => lambda {|x| Time.parse(x).to_s}
+  end.process!
+end
+
+def main
+  options = parse_options
+  pwd = Dir.pwd
+
+  if ARGV.size > 0
+    ARGV.each do |path|
+      puts Daily.new(File.join(pwd, path), options).generate
+    end
+  else
+    puts Daily.new(File.join(pwd, "."), options).generate
+  end
+end
+
+main if __FILE__ == $0
