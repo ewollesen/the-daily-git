@@ -13,7 +13,7 @@ class Daily
 
   def generate
     Dir.chdir(@repo_path)
-    `git log --color --patch --since="#{since}" --until="#{midnight}"`
+    `git fetch && git log --color --patch --since="#{since}" --until="#{midnight}"`
   end
 
 
