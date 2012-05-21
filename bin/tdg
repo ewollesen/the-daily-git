@@ -12,11 +12,28 @@ def yesterday
   yesterday.strftime("%Y-%m-%d")
 end
 
+def last_friday
+  now = Time.now
+  last_friday = Time.local(now.year, now.month, now.day) - SECONDS_IN_A_DAY
+  while not last_friday.saturday? do
+    last_friday -= SECONDS_IN_A_DAY
+  end
+  last_friday.strftime("%Y-%m-%d")
+end
+
+def last_business_day
+  if Time.now.monday?
+    last_friday
+  else
+    yesterday
+  end
+end
+
 def parse_options
   Parser.new do |p|
     p.banner = "The Daily Git"
     p.version = "the-daily-git 0.1 alpha"
-    p.option :date, "the date for which to show commits", :default => yesterday#, :value_satisfies => lambda {|x| Time.parse(x).to_s}
+    p.option :date, "the date for which to show commits", :default => last_business_day#, :value_satisfies => lambda {|x| Time.parse(x).to_s}
   end.process!
 end
 
@@ -26,6 +43,7 @@ def main
 
   if ARGV.size > 0
     ARGV.each do |path|
+      puts File.basename("\n=== %s ===\n\n" % [path])
       puts Daily.new(File.join(pwd, path), options).generate
     end
   else
